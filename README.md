@@ -10,7 +10,7 @@ This is a trusted web scraper for extracting products from Tesco.
 
 - source venv/bin/activate
 
-- pip install requests html5lib beautifulsoup4 selenium python-dotenv
+- pip install requests html5lib beautifulsoup4 selenium python-dotenv pandas
 
 ## How to set the starting time
 

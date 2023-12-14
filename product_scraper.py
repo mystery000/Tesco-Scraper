@@ -21,6 +21,7 @@ def get_product_page_links() -> List[str]:
     links: List[str] = []
     try:
         if os.path.exists(csv_file_name):
+            csv_file_name = "Tesco_Products_Links.csv"
             products = pandas.read_csv(csv_file_name)
             products.drop_duplicates(subset="Link", inplace=True)
             links.extend(products["Link"].values.tolist())
@@ -49,35 +50,35 @@ def get_product_details(links: List[str], sbr_connection: ChromiumRemoteConnecti
                     'image_url',
                     'last_updated' ]
                     
-                writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
-                
-                if csv_file.tell() == 0:
-                    writer.writeheader()
+                    writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+                    
+                    if csv_file.tell() == 0:
+                        writer.writeheader()
 
-                now = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-                
-                title = page.find('section', {'name': 'title'}).h1.get_text()
-                unit_price = page.find('section', {'name': 'title'}).find('p').get_text()
-                image_url = page.find('section', {'name': 'image'}).img['src']
-                description = page.find('div', {'id': 'accordion-panel-product-description'}).get_text()
-                
-                logging.info({
-                    'title': title, 
-                    'description': description,
-                    'unit_price': unit_price,
-                    'product_url': link,
-                    'image_url': image_url,
-                    'last_updated': now,
-                    })
-                
-                writer.writerow({
-                    'title': title, 
-                    'description': description,
-                    'unit_price': unit_price,
-                    'product_url': link,
-                    'image_url': image_url,
-                    'last_updated': now,
-                    })
+                    now = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+                    
+                    title = page.find('section', {'name': 'title'}).h1.get_text()
+                    unit_price = page.find('section', {'name': 'title'}).find('p').get_text()
+                    image_url = page.find('section', {'name': 'image'}).img['src']
+                    description = page.find('div', {'id': 'accordion-panel-product-description'}).get_text()
+                    
+                    logging.info({
+                        'title': title, 
+                        'description': description,
+                        'unit_price': unit_price,
+                        'product_url': link,
+                        'image_url': image_url,
+                        'last_updated': now,
+                        })
+                    
+                    writer.writerow({
+                        'title': title, 
+                        'description': description,
+                        'unit_price': unit_price,
+                        'product_url': link,
+                        'image_url': image_url,
+                        'last_updated': now,
+                        })
 
     except Exception as e:
         logging.info(f"Exception: {str(e)}")
