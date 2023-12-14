@@ -122,7 +122,7 @@ def run_category_scraper():
         logging.info("Tesco category scraper running...")
 
         process_count = 4
-        categories = get_categories()[:4]
+        categories = get_categories()
         unit = math.floor(len(categories) / process_count)
 
         try:

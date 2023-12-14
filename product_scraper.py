@@ -1,4 +1,5 @@
 import os
+import csv
 import sys
 import math
 import pandas
@@ -6,6 +7,7 @@ import logging
 import logging.handlers
 from typing import List
 import multiprocessing as mp
+from datetime import datetime
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from dotenv import load_dotenv
@@ -37,6 +39,45 @@ def get_product_details(links: List[str], sbr_connection: ChromiumRemoteConnecti
                 driver.get(link)
                 html = driver.page_source
                 page = BeautifulSoup(html, "html5lib")
+                
+                with open("tesco_products.csv", 'a', newline='') as csv_file:
+                    fieldnames = [
+                    'title', 
+                    'description',
+                    'unit_price',
+                    'product_url',
+                    'image_url',
+                    'last_updated' ]
+                    
+                writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+                
+                if csv_file.tell() == 0:
+                    writer.writeheader()
+
+                now = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+                
+                title = page.find('section', {'name': 'title'}).h1.get_text()
+                unit_price = page.find('section', {'name': 'title'}).find('p').get_text()
+                image_url = page.find('section', {'name': 'image'}).img['src']
+                description = page.find('div', {'id': 'accordion-panel-product-description'}).get_text()
+                
+                logging.info({
+                    'title': title, 
+                    'description': description,
+                    'unit_price': unit_price,
+                    'product_url': link,
+                    'image_url': image_url,
+                    'last_updated': now,
+                    })
+                
+                writer.writerow({
+                    'title': title, 
+                    'description': description,
+                    'unit_price': unit_price,
+                    'product_url': link,
+                    'image_url': image_url,
+                    'last_updated': now,
+                    })
 
     except Exception as e:
         logging.info(f"Exception: {str(e)}")
@@ -55,7 +96,7 @@ def run_product_scraper():
     try:
         logging.info("Tesco product scraper running...")
 
-        csv_file_name = "products.csv"
+        csv_file_name = "tesco_products.csv"
         if os.path.exists(csv_file_name):
             os.remove(csv_file_name)
 
