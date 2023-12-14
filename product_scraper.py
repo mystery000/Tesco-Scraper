@@ -58,12 +58,12 @@ def get_product_details(links: List[str], sbr_connection: ChromiumRemoteConnecti
                     now = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
                     
                     title_element = page.find('section', {'name': 'title'})
-                    title = title_element.h1.get_text() if title_element.h1 else ''
+                    title = title_element.h1.get_text() if title_element and title_element.h1 else ''
                     
-                    unit_price = title_element.find('p').get_text() if title_element.find('p') else ''
+                    unit_price = title_element.find('p').get_text() if title_element and title_element.find('p') else ''
                     
                     image_element = page.find('section', {'name': 'image'})
-                    image_url = image_element.img['src'] if image_element.img else ''
+                    image_url = image_element.img['src'] if image_element and image_element.img else ''
                     
                     desc_element = page.find('div', {'id': 'accordion-panel-product-description'})
                     description = desc_element.get_text() if desc_element else ''
