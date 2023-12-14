@@ -19,18 +19,18 @@ BASE_URL = "https://www.tesco.com"
 
 def get_categories() -> List[str]:
     categories = [
-        "/christmas/all",
-        "/fresh-food/all",
-        "/bakery/all",
-        "/frozen-food/all",
-        "/treats-and-snacks/all",
-        "/food-cupboard/all",
-        "/drinks/all",
-        "/baby-and-toddler/all",
-        "/health-and-beauty/all",
-        "/pets/all",
-        "/household/all",
-        "/home-and-ents/all",
+        "/christmas/all?include-children=true",
+        "/fresh-food/all?include-children=true",
+        "/bakery/all?include-children=true",
+        "/frozen-food/all?include-children=true",
+        "/treats-and-snacks/all?include-children=true",
+        "/food-cupboard/all?include-children=true",
+        "/drinks/all?include-children=true",
+        "/baby-and-toddler/all?include-children=true",
+        "/health-and-beauty/all?include-children=true",
+        "/pets/all?include-children=true",
+        "/household/all?include-children=true",
+        "/home-and-ents/all?include-children=true",
     ]
 
     return [
@@ -63,7 +63,7 @@ class CategoryScraper:
             with Remote(
                 self._sbr_webdriver_connection, options=chrome_options
             ) as driver:
-                driver.get(f"{category}?page=1")
+                driver.get(f"{category}&page=1")
                 html = driver.page_source
                 page = BeautifulSoup(html, "html5lib")
 
@@ -72,15 +72,14 @@ class CategoryScraper:
                         -2
                     ].span.get_text()
                 )
-
             for page_no in range(0, last_page_number):
                 with Remote(
                     self._sbr_webdriver_connection, options=chrome_options
                 ) as driver:
-                    driver.get(f"{category}?page={page_no + 1}")
+                    driver.get(f"{category}&page={page_no + 1}")
                     html = driver.page_source
                     page = BeautifulSoup(html, "html5lib")
-                    elements = page.find_all("a", class_="product-image-wrapper")
+                    elements = page.select('.product-list--list-item .product-image-wrapper')
                     products += [
                         f"{BASE_URL}/{element['href']}" for element in elements
                     ]
