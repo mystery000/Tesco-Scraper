@@ -132,7 +132,7 @@ def run_product_scraper():
         if os.path.exists(csv_file_name):
             os.remove(csv_file_name)
 
-        process_count = 10
+        process_count = 6
         product_page_links = get_product_page_links()
         unit = math.floor(len(product_page_links) / process_count)
         
