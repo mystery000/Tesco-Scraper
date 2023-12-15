@@ -67,9 +67,12 @@ def get_product_details(links: List[str], sbr_connection: ChromiumRemoteConnecti
                     title_element = parent.find('section', {'name': 'title'})
                     title = title_element.h1.get_text() if title_element and title_element.h1 else ''
                     
-                    price = title_element.find_all('p')
-                    item_price = price[0].get_text() if price[0] else ''
-                    unit_price = price[1].get_text() if price[1] else ''
+                    try:
+                        price = title_element.find_all('p')
+                        item_price = price[0].get_text() if price[0] else ''
+                        unit_price = price[1].get_text() if price[1] else ''
+                    except:
+                        item_price = unit_price = ''
                     
                     try:
                         rating_element = title_element.find('a')
