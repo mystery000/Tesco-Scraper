@@ -109,11 +109,11 @@ def run_product_scraper():
         if os.path.exists(csv_file_name):
             os.remove(csv_file_name)
 
-        process_count = 3
+        process_count = 10
         product_page_links = get_product_page_links()
         unit = math.floor(len(product_page_links) / process_count)
         
-        SBR_WEBDRIVER = f"http://{os.getenv(f'SBR_WEBDRIVER_AUTH1')}@95.217.141.220:9515"
+        SBR_WEBDRIVER = f"http://{os.getenv(f'SBR_WEBDRIVER_AUTH1')}@65.21.129.16:9515"
         
         try:
             sbr_connection = ChromiumRemoteConnection(SBR_WEBDRIVER, "goog", "chrome")
@@ -122,11 +122,7 @@ def run_product_scraper():
             raise e
 
         processes = [
-            mp.Process(
-                target=get_product_details,
-                args=[product_page_links[unit * i : unit * (i + 1)], sbr_connection],
-            )
-            for i in range(process_count)
+            mp.Process(target=get_product_details, args=[product_page_links[unit * i : unit * (i + 1)], sbr_connection]) for i in range(process_count)
         ]
 
         for process in processes:
