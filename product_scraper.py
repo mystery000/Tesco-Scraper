@@ -71,9 +71,13 @@ def get_product_details(links: List[str], sbr_connection: ChromiumRemoteConnecti
                     item_price = price[0].get_text() if price[0] else ''
                     unit_price = price[1].get_text() if price[1] else ''
                     
-                    rating_element = title_element.find('a')
-                    rating_score = rating_element.find_all('span')[0].get_text() if len(rating_element.find_all('span')) else ''
-                    reviews = rating_element.find_all('span')[1].get_text() if len(rating_element.find_all('span')) else ''
+                    try:
+                        rating_element = title_element.find('a')
+                        rating_score = rating_element.find_all('span')[0].get_text() if len(rating_element.find_all('span')) else ''
+                        reviews = rating_element.find_all('span')[1].get_text() if len(rating_element.find_all('span')) else ''
+                    except:
+                        rating_score = 0
+                        reviews = 0
                     
                     tag_element = parent.find('div', class_="styled__DietaryTagsContainer-mfe-pdp__sc-1wwtd31-0 caERWr")
                     tags = ",".join([span.get_text() for span in tag_element.find_all('span')] if tag_element else [])
@@ -109,7 +113,6 @@ def get_product_details(links: List[str], sbr_connection: ChromiumRemoteConnecti
                         'image_url': image_url,
                         'last_updated': now,
                         })
-                time.sleep(0.1)
                     
         except Exception as e:
             logging.info(f"Exception: {str(e)} at {link}")
