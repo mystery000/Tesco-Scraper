@@ -48,11 +48,11 @@ def get_product_details(links: List[str], sbr_connection: ChromiumRemoteConnecti
                     'description',
                     'item_price',
                     'unit_price',
-                    'rating_score',
-                    'reviews',
+                    'averageRating',
+                    'reviewCount',
                     'tags',
                     'product_url',
-                    'image_url',
+                    'thumbnail',
                     'last_updated' ]
                     
                     writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
@@ -76,17 +76,17 @@ def get_product_details(links: List[str], sbr_connection: ChromiumRemoteConnecti
                     
                     try:
                         rating_element = title_element.find('a')
-                        rating_score = rating_element.find_all('span')[0].get_text() if len(rating_element.find_all('span')) else ''
-                        reviews = rating_element.find_all('span')[1].get_text() if len(rating_element.find_all('span')) else ''
+                        averageRating = rating_element.find_all('span')[0].get_text() if len(rating_element.find_all('span')) else ''
+                        reviewCount = int(rating_element.find_all('span')[1].get_text()[1:-1]) if len(rating_element.find_all('span')) else ''
                     except:
-                        rating_score = 0
-                        reviews = 0
+                        averageRating = 0
+                        reviewCount = 0
                     
                     tag_element = parent.find('div', class_="styled__DietaryTagsContainer-mfe-pdp__sc-1wwtd31-0 caERWr")
                     tags = ",".join([span.get_text() for span in tag_element.find_all('span')] if tag_element else [])
                
-                    image_element = parent.find('section', {'name': 'image'})
-                    image_url = image_element.img['src'] if image_element and image_element.img else ''
+                    thumbnail_element = parent.find('section', {'name': 'image'})
+                    thumbnail = thumbnail_element.img['src'] if thumbnail_element and thumbnail_element.img else ''
                     
                     desc_element = parent.find('div', {'id': 'accordion-panel-product-description'})
                     description = desc_element.get_text() if desc_element else ''
@@ -96,11 +96,11 @@ def get_product_details(links: List[str], sbr_connection: ChromiumRemoteConnecti
                         'description': description,
                         'item_price': item_price,
                         'unit_price': unit_price,
-                        'rating_score': rating_score,
-                        'reviews': reviews,
+                        'averageRating': averageRating,
+                        'reviewCount': reviewCount,
                         'tags': tags,
                         'product_url': link,
-                        'image_url': image_url,
+                        'thumbnail': thumbnail,
                         'last_updated': now,
                         })
                     
@@ -109,11 +109,11 @@ def get_product_details(links: List[str], sbr_connection: ChromiumRemoteConnecti
                         'description': description,
                         'item_price': item_price,
                         'unit_price': unit_price,
-                        'rating_score': rating_score,
-                        'reviews': reviews,
+                        'averageRating': averageRating,
+                        'reviewCount': reviewCount,
                         'tags': tags,
                         'product_url': link,
-                        'image_url': image_url,
+                        'thumbnail': thumbnail,
                         'last_updated': now,
                         })
                     
