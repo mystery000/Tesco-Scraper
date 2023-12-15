@@ -1,6 +1,7 @@
 import os
 import csv
 import sys
+import time
 import math
 import pandas
 import logging
@@ -34,8 +35,8 @@ def get_product_page_links() -> List[str]:
 def get_product_details(links: List[str], sbr_connection: ChromiumRemoteConnection):
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument("--start-maximized")
-    try:
-        for link in links:
+    for link in links:
+        try:
             with Remote(sbr_connection, options=chrome_options) as driver:
                 driver.get(link)
                 html = driver.page_source
@@ -85,10 +86,11 @@ def get_product_details(links: List[str], sbr_connection: ChromiumRemoteConnecti
                         'image_url': image_url,
                         'last_updated': now,
                         })
-
-    except Exception as e:
-        logging.info(f"Exception: {str(e)}")
-
+                time.sleep(0.1)
+                    
+        except Exception as e:
+            logging.info(f"Exception: {str(e)} at {link}")
+            
 
 def run_product_scraper():
 
