@@ -46,7 +46,11 @@ def get_product_details(links: List[str], sbr_connection: ChromiumRemoteConnecti
                     fieldnames = [
                     'title', 
                     'description',
+                    'item_price',
                     'unit_price',
+                    'rating_score',
+                    'reviews',
+                    'tags',
                     'product_url',
                     'image_url',
                     'last_updated' ]
@@ -58,21 +62,36 @@ def get_product_details(links: List[str], sbr_connection: ChromiumRemoteConnecti
 
                     now = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
                     
-                    title_element = page.find('section', {'name': 'title'})
+                    parent = page.find('div', class_="template-wrapper")
+                    
+                    title_element = parent.find('section', {'name': 'title'})
                     title = title_element.h1.get_text() if title_element and title_element.h1 else ''
                     
-                    unit_price = title_element.find('p').get_text() if title_element and title_element.find('p') else ''
+                    price = title_element.find_all('p')
+                    item_price = price[0].get_text() if price[0] else ''
+                    unit_price = price[1].get_text() if price[1] else ''
                     
-                    image_element = page.find('section', {'name': 'image'})
+                    rating_element = title_element.find('a')
+                    rating_score = rating_element.find_all('span')[0].get_text() if len(rating_element.find_all('span')) else ''
+                    reviews = rating_element.find_all('span')[1].get_text() if len(rating_element.find_all('span')) else ''
+                    
+                    tag_element = parent.find('div', class_="styled__DietaryTagsContainer-mfe-pdp__sc-1wwtd31-0 caERWr")
+                    tags = ",".join([span.get_text() for span in tag_element.find_all('span')] if tag_element else [])
+               
+                    image_element = parent.find('section', {'name': 'image'})
                     image_url = image_element.img['src'] if image_element and image_element.img else ''
                     
-                    desc_element = page.find('div', {'id': 'accordion-panel-product-description'})
+                    desc_element = parent.find('div', {'id': 'accordion-panel-product-description'})
                     description = desc_element.get_text() if desc_element else ''
                     
                     logging.info({
                         'title': title, 
                         'description': description,
+                        'item_price': item_price,
                         'unit_price': unit_price,
+                        'rating_score': rating_score,
+                        'reviews': reviews,
+                        'tags': tags,
                         'product_url': link,
                         'image_url': image_url,
                         'last_updated': now,
@@ -81,7 +100,11 @@ def get_product_details(links: List[str], sbr_connection: ChromiumRemoteConnecti
                     writer.writerow({
                         'title': title, 
                         'description': description,
+                        'item_price': item_price,
                         'unit_price': unit_price,
+                        'rating_score': rating_score,
+                        'reviews': reviews,
+                        'tags': tags,
                         'product_url': link,
                         'image_url': image_url,
                         'last_updated': now,

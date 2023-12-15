@@ -26,10 +26,10 @@ Please change the time as 24H format in <b style="color: green">watcher.txt</b>
 
   pkill -f main.py
 
-* Selenium Grid Server Installation
 
+## Selenium Grid Server Installation
+- https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html
 - https://www.selenium.dev/documentation/grid/getting_started/
 - https://github.com/SeleniumHQ/selenium/releases/tag/selenium-4.16.0
 - https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/120.0.6099.71/win64/chromedriver-win64.zip
-- https://www.selenium.dev/documentation/webdriver/troubleshooting/errors/driver_location/#use-the-path-environment-variable
 - java -jar selenium-server-<version>.jar standalone --selenium-manager true
