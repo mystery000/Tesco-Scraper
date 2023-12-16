@@ -151,9 +151,9 @@ def run_product_scraper():
             raise e
 
         processes = [
-            mp.Process(target=get_product_details, args=[product_page_links[unit * i : unit * (i + 1)], sbr_connection])
+            mp.Process(target=get_product_details, args=[product_page_links[unit * i : ], sbr_connection])
             if i == process_count - 1
-            else mp.Process(target=get_product_details, args=[product_page_links[unit * i : ], sbr_connection])
+            else mp.Process(target=get_product_details, args=[product_page_links[unit * i : unit * (i + 1)], sbr_connection])
             for i in range(process_count)
         ]
 
