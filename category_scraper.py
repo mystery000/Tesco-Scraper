@@ -113,7 +113,7 @@ def run_category_scraper():
         handlers=[logging.StreamHandler(sys.stdout)],
     )
 
-    SBR_WEBDRIVER = f"http://{os.getenv(f'SBR_WEBDRIVER_AUTH1')}@65.21.129.16:9515"
+    SBR_WEBDRIVER = f"http://{os.getenv(f'SBR_WEBDRIVER_AUTH')}@65.21.129.16:9515"
 
     processes: List[mp.Process] = []
 
