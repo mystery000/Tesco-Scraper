@@ -136,6 +136,13 @@ def run_category_scraper():
                     categories[unit * i : unit * (i + 1)], sbr_connection
                 ).run
             )
+            if i == process_count - 1
+            else
+            mp.Process(
+                target=CategoryScraper(
+                    categories[unit * i : ], sbr_connection
+                ).run
+            )
             for i in range(process_count)
         ]
         for process in processes:
