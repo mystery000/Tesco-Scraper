@@ -142,7 +142,7 @@ def run_product_scraper():
         product_page_links = get_product_page_links()
         unit = math.floor(len(product_page_links) / process_count)
         
-        SBR_WEBDRIVER = f"http://{os.getenv(f'SBR_WEBDRIVER_AUTH')}@65.21.129.16:9515"
+        SBR_WEBDRIVER = f"http://{os.getenv('SELENIUM_WEBDRIVER_AUTH')}@{os.getenv('SELENIUM_SERVER_IP')}:{os.getenv('SELENIUM_SERVER_PORT')}"
         
         try:
             sbr_connection = ChromiumRemoteConnection(SBR_WEBDRIVER, "goog", "chrome")
