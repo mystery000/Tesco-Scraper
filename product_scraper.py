@@ -18,11 +18,10 @@ from selenium.webdriver.chromium.remote_connection import ChromiumRemoteConnecti
 load_dotenv()
 
 def get_product_page_links() -> List[str]:
-    csv_file_name = "Tesco_Products_Links.csv"
+    csv_file_name = "tesco_product_links.csv"
     links: List[str] = []
     try:
         if os.path.exists(csv_file_name):
-            csv_file_name = "Tesco_Products_Links.csv"
             products = pandas.read_csv(csv_file_name)
             products.drop_duplicates(subset="Link", inplace=True)
             links.extend(products["Link"].values.tolist())
@@ -44,15 +43,20 @@ def get_product_details(links: List[str], sbr_connection: ChromiumRemoteConnecti
                 
                 with open("tesco_products.csv", 'a', newline='') as csv_file:
                     fieldnames = [
+                    'source',
                     'title', 
                     'description',
                     'item_price',
                     'unit_price',
-                    'averageRating',
-                    'reviewCount',
+                    'offer_price',
+                    'offer_from',
+                    'offer_to',
+                    'average_rating',
+                    'review_count',
+                    'categories',
                     'tags',
                     'product_url',
-                    'thumbnail',
+                    'image_url',
                     'last_updated' ]
                     
                     writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
@@ -62,58 +66,86 @@ def get_product_details(links: List[str], sbr_connection: ChromiumRemoteConnecti
 
                     now = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
                     
+                    source = "Tesco"
+                    
                     parent = page.find('div', class_="template-wrapper")
                     
                     title_element = parent.find('section', {'name': 'title'})
-                    title = title_element.h1.get_text() if title_element and title_element.h1 else ''
+                    title = title_element.h1.get_text() if title_element and title_element.h1 else None
                     
                     try:
-                        price = title_element.find_all('p')
-                        item_price = price[0].get_text() if price[0] else ''
-                        unit_price = price[1].get_text() if price[1] else ''
+                        price_element = title_element.find('div', {'data-auto': 'pdp-buy-box'})
+                        price = price_element.find_all('p')
+                        item_price = price[0].get_text() if price[0] else None
+                        unit_price = price[1].get_text() if price[1] else None
                     except:
-                        item_price = unit_price = ''
+                        item_price = unit_price = None
                     
+                    try:
+                        offer_element = title_element.find('div', {'data-testid': 'value-bar'})
+                        clubcard = offer_element.find_all('span')[-1].get_text(strip=True)
+                        offer_message = offer_element.find("p").get_text(strip=True)
+                        from_idx = offer_message.index("from")
+                        until_idx = offer_message.index("until")
+                        offer_price = clubcard.replace("Clubcard Price", "").strip()
+                        offer_from = offer_message[from_idx + len("from") : until_idx].strip()
+                        offer_to = offer_message[until_idx + len("until"):].strip()
+                    except:
+                        offer_price = offer_from = offer_to = None
+                        
                     try:
                         rating_element = title_element.find('a')
-                        averageRating = rating_element.find_all('span')[0].get_text() if len(rating_element.find_all('span')) else ''
-                        reviewCount = int(rating_element.find_all('span')[1].get_text()[1:-1]) if len(rating_element.find_all('span')) else ''
+                        average_rating = rating_element.find_all('span')[0].get_text() if len(rating_element.find_all('span')) else None
+                        review_count = int(rating_element.find_all('span')[1].get_text()[1:-1]) if len(rating_element.find_all('span')) else None
                     except:
-                        averageRating = 0
-                        reviewCount = 0
+                        average_rating = 0
+                        review_count = 0
                     
-                    tag_element = parent.find('div', class_="styled__DietaryTagsContainer-mfe-pdp__sc-1wwtd31-0 caERWr")
+                    breadcrumbs_element = parent.find("div", {"data-auto": "pdp-breadcrumbs"})
+                    categories = " / ".join([category.get_text(strip=True) for category in breadcrumbs_element.find_all("li")][1:] if breadcrumbs_element else [])
+                    
+                    tag_element = parent.find('div', class_="styled__DietaryTagsContainer-mfe-pdp__sc-1wwtd31-0")
                     tags = ",".join([span.get_text() for span in tag_element.find_all('span')] if tag_element else [])
                
-                    thumbnail_element = parent.find('section', {'name': 'image'})
-                    thumbnail = thumbnail_element.img['src'] if thumbnail_element and thumbnail_element.img else ''
+                    image_element = parent.find('section', {'name': 'image'})
+                    image_url = image_element.img['src'] if image_element and image_element.img else None
                     
                     desc_element = parent.find('div', {'id': 'accordion-panel-product-description'})
-                    description = desc_element.get_text() if desc_element else ''
+                    description = desc_element.get_text() if desc_element else None
                     
                     logging.info({
+                        'source': source,
                         'title': title, 
                         'description': description,
                         'item_price': item_price,
                         'unit_price': unit_price,
-                        'averageRating': averageRating,
-                        'reviewCount': reviewCount,
+                        'offer_price': offer_price,
+                        'offer_from': offer_from,
+                        'offer_to': offer_to,
+                        'average_rating': average_rating,
+                        'review_count': review_count,
+                        'categories': categories,
                         'tags': tags,
                         'product_url': link,
-                        'thumbnail': thumbnail,
+                        'image_url': image_url,
                         'last_updated': now,
                         })
                     
                     writer.writerow({
+                        'source': source,
                         'title': title, 
                         'description': description,
                         'item_price': item_price,
                         'unit_price': unit_price,
-                        'averageRating': averageRating,
-                        'reviewCount': reviewCount,
+                        'offer_price': offer_price,
+                        'offer_from': offer_from,
+                        'offer_to': offer_to,
+                        'average_rating': average_rating,
+                        'review_count': review_count,
+                        'categories': categories,
                         'tags': tags,
                         'product_url': link,
-                        'thumbnail': thumbnail,
+                        'image_url': image_url,
                         'last_updated': now,
                         })
                     

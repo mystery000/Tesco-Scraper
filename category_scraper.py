@@ -81,7 +81,7 @@ class CategoryScraper:
                     page = BeautifulSoup(html, "html5lib")
                     elements = page.select('.product-list--list-item .product-image-wrapper')
                     products += [
-                        f"{BASE_URL}/{element['href']}" for element in elements
+                        f"{BASE_URL}{element['href']}" for element in elements
                     ]
 
         except Exception as e:
@@ -92,7 +92,7 @@ class CategoryScraper:
     def run(self):
         for category in self._categories:
             product_links = self.get_products_by_category(category)
-            csv_file_name = "Tesco_Products_Links.csv"
+            csv_file_name = "tesco_product_links.csv"
             with open(csv_file_name, "a", newline="") as csv_file:
                 fieldnames = ["Link"]
                 writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
@@ -103,7 +103,7 @@ class CategoryScraper:
 
 
 def run_category_scraper():
-    csv_file_name = "Tesco_Products_Links.csv"
+    csv_file_name = "tesco_product_links.csv"
     if os.path.exists(csv_file_name):
         os.remove(csv_file_name)
 

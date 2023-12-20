@@ -1,6 +1,6 @@
 # Description
 
-This is a trusted web scraper for extracting products from [Tesco](https://tesco.com/).
+This is a trusted web scraper for extracting products from [Tesco](https://tesco.com/) supermarket.
 
 # Usage
 
@@ -22,9 +22,7 @@ This scraper only supports Ubuntu.
 
   - Start the Selenium Grid
 
-    - `java -jar selenium-server-<version>.jar hup --port 9515`
-
-    - `java -jar selenium-server-<version>.jar node`   
+    `java -jar selenium-server-<version>.jar standalone --port 9515`
 
   - Configure `.env` with your Selenium server IP address and port
 
