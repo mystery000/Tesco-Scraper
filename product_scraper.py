@@ -123,7 +123,9 @@ def get_product_details(links: List[str], sbr_connection: ChromiumRemoteConnecti
                         nutrition = { "unit" : nutrition_title }
                         for row in nutrition_rows:
                             nutrition_cells = list(row.children)
-                            nutrition[nutrition_cells[0].get_text(strip=True)] = nutrition_cells[_id].get_text(strip=True)
+                            typical_value = nutrition_cells[0].get_text(strip=True)
+                            if typical_value.lower().find("which") >= 0: continue
+                            nutrition[typical_value] = nutrition_cells[_id].get_text(strip=True)
                         
                         nutritions["values"].append(nutrition)
                     except:
