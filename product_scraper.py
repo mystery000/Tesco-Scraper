@@ -11,11 +11,8 @@ import multiprocessing as mp
 from datetime import datetime
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from dotenv import load_dotenv
 from selenium.webdriver import Remote
 from selenium.webdriver.chromium.remote_connection import ChromiumRemoteConnection
-
-load_dotenv()
 
 def get_product_page_links() -> List[str]:
     csv_file_name = "tesco_product_links.csv"
@@ -55,6 +52,7 @@ def get_product_details(links: List[str], sbr_connection: ChromiumRemoteConnecti
                     'review_count',
                     'categories',
                     'tags',
+                    'nutrition',
                     'product_url',
                     'image_url',
                     'last_updated' ]
@@ -113,6 +111,24 @@ def get_product_details(links: List[str], sbr_connection: ChromiumRemoteConnecti
                     desc_element = parent.find('div', {'id': 'accordion-panel-product-description'})
                     description = desc_element.get_text() if desc_element else None
                     
+                    nutritions = { "values": [] }
+                    
+                    try:
+                      nutritional_information = parent.find("div", {"id" : "accordion-panel-nutritional-information"})
+                      nutrition_titles = [title.get_text(strip=True) for title in nutritional_information.thead.find_all("th")]
+                      nutrition_rows = nutritional_information.tbody.find_all("tr")
+
+                      for _id, nutrition_title in enumerate(nutrition_titles):
+                        if _id == 0 : continue
+                        nutrition = { "unit" : nutrition_title }
+                        for row in nutrition_rows:
+                            nutrition_cells = list(row.children)
+                            nutrition[nutrition_cells[0].get_text(strip=True)] = nutrition_cells[_id].get_text(strip=True)
+                        
+                        nutritions["values"].append(nutrition)
+                    except:
+                      nutritions = { "values": [] }
+                      
                     logging.info({
                         'source': source,
                         'title': title, 
@@ -126,6 +142,7 @@ def get_product_details(links: List[str], sbr_connection: ChromiumRemoteConnecti
                         'review_count': review_count,
                         'categories': categories,
                         'tags': tags,
+                        'nutrition': nutritions,
                         'product_url': link,
                         'image_url': image_url,
                         'last_updated': now,
@@ -144,6 +161,7 @@ def get_product_details(links: List[str], sbr_connection: ChromiumRemoteConnecti
                         'review_count': review_count,
                         'categories': categories,
                         'tags': tags,
+                        'nutrition': nutritions,
                         'product_url': link,
                         'image_url': image_url,
                         'last_updated': now,
@@ -174,18 +192,18 @@ def run_product_scraper():
         product_page_links = get_product_page_links()
         unit = math.floor(len(product_page_links) / process_count)
         
-        SBR_WEBDRIVER = f"http://{os.getenv('SELENIUM_WEBDRIVER_AUTH')}@{os.getenv('SELENIUM_SERVER_IP')}:{os.getenv('SELENIUM_SERVER_PORT')}"
+        SELENIUM_GRID_IP_ADDRESSES = [
+            "95.217.141.220:9515",
+            "65.21.129.16:9515",
+            "135.181.212.76:9515",
+        ]
         
-        try:
-            sbr_connection = ChromiumRemoteConnection(SBR_WEBDRIVER, "goog", "chrome")
-        except Exception as e:
-            logging.error(f"Scraping Browser connection failed")
-            raise e
+        sbr_connections = [ChromiumRemoteConnection(f"http://{IP}", "goog", "chrome") for IP in SELENIUM_GRID_IP_ADDRESSES]
 
         processes = [
-            mp.Process(target=get_product_details, args=[product_page_links[unit * i : ], sbr_connection])
+            mp.Process(target=get_product_details, args=[product_page_links[unit * i : ], sbr_connections[i % len(SELENIUM_GRID_IP_ADDRESSES)]])
             if i == process_count - 1
-            else mp.Process(target=get_product_details, args=[product_page_links[unit * i : unit * (i + 1)], sbr_connection])
+            else mp.Process(target=get_product_details, args=[product_page_links[unit * i : unit * (i + 1)], sbr_connections[i % len(SELENIUM_GRID_IP_ADDRESSES)]])
             for i in range(process_count)
         ]
 

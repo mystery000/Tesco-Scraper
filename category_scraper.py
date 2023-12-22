@@ -8,11 +8,8 @@ from typing import List
 import multiprocessing as mp
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from dotenv import load_dotenv
 from selenium.webdriver import Remote
 from selenium.webdriver.chromium.remote_connection import ChromiumRemoteConnection
-
-load_dotenv()
 
 BASE_URL = "https://www.tesco.com"
 
@@ -113,8 +110,6 @@ def run_category_scraper():
         handlers=[logging.StreamHandler(sys.stdout)],
     )
 
-    SBR_WEBDRIVER = f"http://{os.getenv('SELENIUM_WEBDRIVER_AUTH')}@{os.getenv('SELENIUM_SERVER_IP')}:{os.getenv('SELENIUM_SERVER_PORT')}"
-
     processes: List[mp.Process] = []
 
     try:
@@ -124,25 +119,18 @@ def run_category_scraper():
         categories = get_categories()
         unit = math.floor(len(categories) / process_count)
 
-        try:
-            sbr_connection = ChromiumRemoteConnection(SBR_WEBDRIVER, "goog", "chrome")
-        except Exception as e:
-            logging.error(f"Scraping Browser connection failed")
-            raise e
+        SELENIUM_GRID_IP_ADDRESSES = [
+            "95.217.141.220:9515",
+            "65.21.129.16:9515",
+            "135.181.212.76:9515",
+        ]
+        
+        sbr_connections = [ChromiumRemoteConnection(f"http://{IP}", "goog", "chrome") for IP in SELENIUM_GRID_IP_ADDRESSES]
 
         processes = [
-            mp.Process(
-                target=CategoryScraper(
-                    categories[unit * i : ], sbr_connection
-                ).run
-            )
+            mp.Process(target=CategoryScraper(categories[unit * i : ], sbr_connections[i % len(SELENIUM_GRID_IP_ADDRESSES)]).run)
             if i == process_count - 1
-            else
-            mp.Process(
-                target=CategoryScraper(
-                    categories[unit * i : unit * (i + 1)], sbr_connection
-                ).run
-            )
+            else mp.Process(target=CategoryScraper(categories[unit * i : unit * (i + 1)], sbr_connections[i % len(SELENIUM_GRID_IP_ADDRESSES)]).run)
             for i in range(process_count)
         ]
         for process in processes:
