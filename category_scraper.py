@@ -2,6 +2,7 @@ import os
 import sys
 import csv
 import math
+import json
 import logging
 import logging.handlers
 from typing import List
@@ -15,27 +16,16 @@ BASE_URL = "https://www.tesco.com"
 
 
 def get_categories() -> List[str]:
-    categories = [
-        "/christmas/all?include-children=true",
-        "/fresh-food/all?include-children=true",
-        "/bakery/all?include-children=true",
-        "/frozen-food/all?include-children=true",
-        "/treats-and-snacks/all?include-children=true",
-        "/food-cupboard/all?include-children=true",
-        "/drinks/all?include-children=true",
-        "/baby-and-toddler/all?include-children=true",
-        "/health-and-beauty/all?include-children=true",
-        "/pets/all?include-children=true",
-        "/household/all?include-children=true",
-        "/home-and-ents/all?include-children=true",
-    ]
-
-    return [
-        f"https://www.tesco.com/groceries/en-GB/shop{category}"
-        for category in categories
-    ]
-
-
+    categories: List[str] = []
+    try:
+        with open("taxonomy.json", "r") as file:
+            taxonomy = json.load(file)
+            categories = [f"https://www.tesco.com/groceries/en-GB/shop{category}" for category in taxonomy["categories"]]
+    except Exception as e:
+        logging.info(f"Exception: {str(e)}")
+    finally:
+        return categories
+    
 class CategoryScraper:
     _categories: List[str]
     _sbr_webdriver_connection: ChromiumRemoteConnection
