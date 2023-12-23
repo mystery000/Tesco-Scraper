@@ -104,9 +104,12 @@ def get_product_details(links: List[str], sbr_connection: ChromiumRemoteConnecti
                     
                     tag_element = parent.find('div', class_="styled__DietaryTagsContainer-mfe-pdp__sc-1wwtd31-0")
                     tags = ",".join([span.get_text() for span in tag_element.find_all('span')] if tag_element else [])
-               
-                    image_element = parent.find('section', {'name': 'image'})
-                    image_url = image_element.img['src'] if image_element and image_element.img else None
+                    
+                    try:
+                        image_element = parent.find('section', {'name': 'image'})
+                        image_url = image_element.img['src'] if image_element and image_element.img else None
+                    except:
+                        image_url = None
                     
                     desc_element = parent.find('div', {'id': 'accordion-panel-product-description'})
                     description = desc_element.get_text() if desc_element else None
