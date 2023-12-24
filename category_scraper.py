@@ -2,6 +2,8 @@ import os
 import sys
 import csv
 import math
+import time
+import random
 import logging
 import logging.handlers
 from typing import List
@@ -68,6 +70,7 @@ class CategoryScraper:
                     ].span.get_text()
                 )
             for page_no in range(0, last_page_number):
+                time.sleep(random.choice([0,2, 0.25, 0.3]))
                 with Remote(
                     self._sbr_webdriver_connection, options=chrome_options
                 ) as driver:
