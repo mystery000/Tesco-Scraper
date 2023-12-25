@@ -11,7 +11,7 @@ import multiprocessing as mp
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver import Remote
-from selenium.webdriver.chromium.remote_connection import ChromiumRemoteConnection
+from selenium.webdriver.firefox.remote_connection import FirefoxRemoteConnection
 
 BASE_URL = "https://www.tesco.com"
 
@@ -39,12 +39,12 @@ def get_categories() -> List[str]:
     
 class CategoryScraper:
     _categories: List[str]
-    _sbr_webdriver_connection: ChromiumRemoteConnection
+    _sbr_webdriver_connection: FirefoxRemoteConnection
 
     def __init__(
         self,
         categories: List[str],
-        sbr_webdriver_connection: ChromiumRemoteConnection,
+        sbr_webdriver_connection: FirefoxRemoteConnection,
     ):
         self._categories = categories
         self._sbr_webdriver_connection = sbr_webdriver_connection
@@ -52,13 +52,13 @@ class CategoryScraper:
     def get_products_by_category(self, category: str) -> List[str]:
         products: List[str] = []
 
-        chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument("--start-maximized")
+        firefox_options = webdriver.FirefoxOptions()
+        firefox_options.add_argument("--start-maximized")
         
         logging.info(category)
 
         try:
-            with Remote(self._sbr_webdriver_connection, options=chrome_options) as driver:
+            with Remote(self._sbr_webdriver_connection, options=firefox_options) as driver:
                 driver.get(f"{category}&page=1")
                 html = driver.page_source
                 page = BeautifulSoup(html, "html5lib")
@@ -71,7 +71,7 @@ class CategoryScraper:
                 
             for page_no in range(0, last_page_number):
                 time.sleep(random.choice([0,2, 0.25, 0.3]))
-                with Remote(self._sbr_webdriver_connection, options=chrome_options) as driver:
+                with Remote(self._sbr_webdriver_connection, options=firefox_options) as driver:
                     driver.get(f"{category}&page={page_no + 1}")
                     html = driver.page_source
                     page = BeautifulSoup(html, "html5lib")
@@ -97,7 +97,12 @@ class CategoryScraper:
                     writer.writeheader()
                 for product in product_links:
                     writer.writerow({"Link": product})
-
+                    
+    def get_all_products_by_categories(self) -> List[str]:
+        products: List[str] = []
+        for category in self._categories:
+            products.extend(self.get_products_by_category(category))
+        return products
 
 def run_category_scraper():
     csv_file_name = "tesco_product_links.csv"
@@ -125,7 +130,7 @@ def run_category_scraper():
             "65.21.132.89:9515",
         ]
         
-        sbr_connections = [ChromiumRemoteConnection(f"http://{IP}", "goog", "chrome") for IP in SELENIUM_GRID_IP_ADDRESSES]
+        sbr_connections = [FirefoxRemoteConnection(f"http://{IP}", "mozilla", "firefox") for IP in SELENIUM_GRID_IP_ADDRESSES]
 
         processes = [
             mp.Process(target=CategoryScraper(categories[unit * i : ], sbr_connections[i % len(SELENIUM_GRID_IP_ADDRESSES)]).run)

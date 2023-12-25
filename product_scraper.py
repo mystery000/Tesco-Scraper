@@ -13,15 +13,13 @@ from datetime import datetime
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver import Remote
-from selenium.webdriver.chromium.remote_connection import ChromiumRemoteConnection
+from selenium.webdriver.firefox.remote_connection import FirefoxRemoteConnection
 
-def get_product_page_links() -> List[str]:
-    csv_file_name = "tesco_product_links.csv"
+def get_product_page_links_from_csv(file_name: str) -> List[str]:
     links: List[str] = []
-    
     try:
-        if os.path.exists(csv_file_name):
-            products = pandas.read_csv(csv_file_name)
+        if os.path.exists(file_name):
+            products = pandas.read_csv(file_name)
             products.drop_duplicates(subset="Link", inplace=True)
             links.extend(products["Link"].values.tolist())
             
@@ -32,14 +30,14 @@ def get_product_page_links() -> List[str]:
         return links
 
 
-def get_product_details(links: List[str], sbr_connection: ChromiumRemoteConnection):
-    chrome_options = webdriver.ChromeOptions()
-    chrome_options.add_argument("--start-maximized")
+def get_product_details(links: List[str], sbr_connection: FirefoxRemoteConnection):
+    firefox_options = webdriver.FirefoxOptions()
+    firefox_options.add_argument("--start-maximized")
     
     for link in links:
         time.sleep(random.choice([0.15, 0.2, 0.22, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5]))
         try:
-            with Remote(sbr_connection, options=chrome_options) as driver:
+            with Remote(sbr_connection, options=firefox_options) as driver:
                 driver.get(link)
                 html = driver.page_source
                 page = BeautifulSoup(html, "html5lib")
@@ -72,8 +70,19 @@ def get_product_details(links: List[str], sbr_connection: ChromiumRemoteConnecti
                     
                     source = "Tesco"
                     
-                    parent = page.find('div', class_="template-wrapper")
-                    
+                    try:
+                        parent = page.find('div', class_="template-wrapper")
+                    except:
+                        pagination = page.find('div', class_="pagination__results-count")
+                        
+                        if pagination:
+                            with open("tesco_reward.csv", 'a', newline='') as csv_file:
+                                writer = csv.DictWriter(csv_file, fieldnames=["Link"])
+                                if csv_file.tell() == 0: writer.writeheader()
+                                writer.writerow({"Link": link})
+                                
+                        continue
+                        
                     title_element = parent.find('section', {'name': 'title'})
                     title = title_element.h1.get_text() if title_element and title_element.h1 else None
                     
@@ -199,8 +208,12 @@ def run_product_scraper():
         if os.path.exists(csv_file_name):
             os.remove(csv_file_name)
 
+        csv_reward_file_name = "tesco_reward.csv"
+        if os.path.exists(csv_reward_file_name):
+            os.remove(csv_reward_file_name)
+            
         process_count = 6
-        product_page_links = get_product_page_links()
+        product_page_links = get_product_page_links_from_csv("tesco_product_links.csv")
         unit = math.floor(len(product_page_links) / process_count)
         
         SELENIUM_GRID_IP_ADDRESSES = [
@@ -209,7 +222,7 @@ def run_product_scraper():
             "65.21.194.207:9515",
         ]
         
-        sbr_connections = [ChromiumRemoteConnection(f"http://{IP}", "goog", "chrome") for IP in SELENIUM_GRID_IP_ADDRESSES]
+        sbr_connections = [FirefoxRemoteConnection(f"http://{IP}", "mozilla", "firefox") for IP in SELENIUM_GRID_IP_ADDRESSES]
 
         processes = [
             mp.Process(target=get_product_details, args=[product_page_links[unit * i : ], sbr_connections[i % len(SELENIUM_GRID_IP_ADDRESSES)]])

@@ -3,8 +3,9 @@ import logging
 import asyncio
 import logging.handlers
 from datetime import datetime
-from category_scraper import run_category_scraper
+from reward_scraper import run_reward_scraper
 from product_scraper import run_product_scraper
+from category_scraper import run_category_scraper
 
 class Watcher():
     def __init__(self):
@@ -33,6 +34,8 @@ async def run():
             run_category_scraper()
             await asyncio.sleep(10)
             run_product_scraper()
+            await asyncio.sleep(10)
+            run_reward_scraper()
 
         await asyncio.sleep(0.1)
 
