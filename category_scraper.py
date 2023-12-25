@@ -36,6 +36,7 @@ def get_categories() -> List[str]:
         for category in categories
     ]
     
+    
 class CategoryScraper:
     _categories: List[str]
     _sbr_webdriver_connection: ChromiumRemoteConnection
@@ -57,9 +58,7 @@ class CategoryScraper:
         logging.info(category)
 
         try:
-            with Remote(
-                self._sbr_webdriver_connection, options=chrome_options
-            ) as driver:
+            with Remote(self._sbr_webdriver_connection, options=chrome_options) as driver:
                 driver.get(f"{category}&page=1")
                 html = driver.page_source
                 page = BeautifulSoup(html, "html5lib")
@@ -69,11 +68,10 @@ class CategoryScraper:
                         -2
                     ].span.get_text()
                 )
+                
             for page_no in range(0, last_page_number):
                 time.sleep(random.choice([0,2, 0.25, 0.3]))
-                with Remote(
-                    self._sbr_webdriver_connection, options=chrome_options
-                ) as driver:
+                with Remote(self._sbr_webdriver_connection, options=chrome_options) as driver:
                     driver.get(f"{category}&page={page_no + 1}")
                     html = driver.page_source
                     page = BeautifulSoup(html, "html5lib")
@@ -84,6 +82,7 @@ class CategoryScraper:
 
         except Exception as e:
             logging.info(f"Exception: {str(e)}")
+            
         finally:
             return products
 
@@ -134,8 +133,10 @@ def run_category_scraper():
             else mp.Process(target=CategoryScraper(categories[unit * i : unit * (i + 1)], sbr_connections[i % len(SELENIUM_GRID_IP_ADDRESSES)]).run)
             for i in range(process_count)
         ]
+        
         for process in processes:
             process.start()
+            
         for process in processes:
             process.join()
 
@@ -143,11 +144,12 @@ def run_category_scraper():
 
     except KeyboardInterrupt:
         logging.info("Quitting...")
+        
     except Exception as e:
         logging.warning(f"Exception: {str(e)}")
-    finally:
-        for process in processes:
-            process.terminate()
+        
+    finally: 
+        for process in processes: process.terminate()
 
 
 if __name__ == "__main__":

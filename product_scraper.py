@@ -18,13 +18,16 @@ from selenium.webdriver.chromium.remote_connection import ChromiumRemoteConnecti
 def get_product_page_links() -> List[str]:
     csv_file_name = "tesco_product_links.csv"
     links: List[str] = []
+    
     try:
         if os.path.exists(csv_file_name):
             products = pandas.read_csv(csv_file_name)
             products.drop_duplicates(subset="Link", inplace=True)
             links.extend(products["Link"].values.tolist())
+            
     except pandas.errors.EmptyDataError as e:
         logging.error(f"Error: {str(e)}")
+        
     finally:
         return links
 
@@ -32,6 +35,7 @@ def get_product_page_links() -> List[str]:
 def get_product_details(links: List[str], sbr_connection: ChromiumRemoteConnection):
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument("--start-maximized")
+    
     for link in links:
         time.sleep(random.choice([0.15, 0.2, 0.22, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5]))
         try:
@@ -216,16 +220,18 @@ def run_product_scraper():
 
         for process in processes:
             process.start()
+            
         for process in processes:
             process.join()
 
     except KeyboardInterrupt:
         logging.info("Quitting...")
+        
     except Exception as e:
         logging.warning(f"Exception: {str(e)}")
+        
     finally:
-        for process in processes:
-            process.terminate()
+        for process in processes: process.terminate()
         logging.info("Tesco product scraper finished")
 
 
