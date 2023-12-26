@@ -98,11 +98,6 @@ class CategoryScraper:
                 for product in product_links:
                     writer.writerow({"Link": product})
                     
-    def get_all_products_by_categories(self) -> List[str]:
-        products: List[str] = []
-        for category in self._categories:
-            products.extend(self.get_products_by_category(category))
-        return products
 
 def run_category_scraper():
     csv_file_name = "tesco_product_links.csv"
