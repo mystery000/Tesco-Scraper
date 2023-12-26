@@ -70,18 +70,17 @@ def get_product_details(links: List[str], sbr_connection: FirefoxRemoteConnectio
                     
                     source = "Tesco"
                     
-                    try:
-                        parent = page.find('div', class_="template-wrapper")
-                    except:
+                    parent = page.find('div', class_="template-wrapper")
+                    
+                    if parent is None:
                         pagination = page.find('div', class_="pagination__results-count")
-                        
                         if pagination:
                             with open("tesco_reward.csv", 'a', newline='') as csv_file:
                                 writer = csv.DictWriter(csv_file, fieldnames=["Link"])
                                 if csv_file.tell() == 0: writer.writeheader()
                                 writer.writerow({"Link": link})
                                 
-                        continue
+                            continue
                         
                     title_element = parent.find('section', {'name': 'title'})
                     title = title_element.h1.get_text() if title_element and title_element.h1 else None
