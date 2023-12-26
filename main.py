@@ -3,7 +3,6 @@ import logging
 import asyncio
 import logging.handlers
 from datetime import datetime
-from reward_scraper import run_reward_scraper
 from product_scraper import run_product_scraper
 from category_scraper import run_category_scraper
 
@@ -34,8 +33,6 @@ async def run():
             run_category_scraper()
             await asyncio.sleep(10)
             run_product_scraper()
-            await asyncio.sleep(10)
-            run_reward_scraper()
 
         await asyncio.sleep(0.1)
 
