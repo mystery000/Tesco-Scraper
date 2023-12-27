@@ -204,9 +204,9 @@ def run_product_scraper():
         unit = math.floor(len(product_page_links) / process_count)
         
         SELENIUM_GRID_IP_ADDRESSES = [
-            "65.21.77.95:9515",
-            "65.21.123.13:9515",
-            "65.21.194.207:9515",
+            "18.169.27.82:9515",
+            "13.42.66.41:9515",
+            "18.171.169.136:9515"
         ]
         
         sbr_connections = [FirefoxRemoteConnection(f"http://{IP}", "mozilla", "firefox") for IP in SELENIUM_GRID_IP_ADDRESSES]
