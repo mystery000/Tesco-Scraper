@@ -3,6 +3,7 @@ import csv
 import sys
 import time
 import math
+import json
 import pandas
 import random
 import logging
@@ -155,7 +156,7 @@ def get_product_details(links: List[str], sbr_connection: FirefoxRemoteConnectio
                         'review_count': review_count,
                         'categories': categories,
                         'tags': tags,
-                        'nutrition': nutritions,
+                        'nutrition': json.dumps(nutritions),
                         'product_url': link,
                         'image_url': image_url,
                         'last_updated': now,
@@ -174,7 +175,7 @@ def get_product_details(links: List[str], sbr_connection: FirefoxRemoteConnectio
                         'review_count': review_count,
                         'categories': categories,
                         'tags': tags,
-                        'nutrition': nutritions,
+                        'nutrition': json.dumps(nutritions),
                         'product_url': link,
                         'image_url': image_url,
                         'last_updated': now,
