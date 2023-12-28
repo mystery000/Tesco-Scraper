@@ -16,27 +16,13 @@ from selenium.webdriver.firefox.remote_connection import FirefoxRemoteConnection
 
 BASE_URL = "https://www.tesco.com"
 
-def get_categories() -> List[str]:
-    categories = [
-        "/christmas/all?include-children=true",
-        "/fresh-food/all?include-children=true",
-        "/bakery/all?include-children=true",
-        "/frozen-food/all?include-children=true",
-        "/treats-and-snacks/all?include-children=true",
-        "/food-cupboard/all?include-children=true",
-        "/drinks/all?include-children=true",
-        "/baby-and-toddler/all?include-children=true",
-        "/health-and-beauty/all?include-children=true",
-        "/pets/all?include-children=true",
-        "/household/all?include-children=true",
-        "/home-and-ents/all?include-children=true",
-    ]
-
-    return [
-        f"https://www.tesco.com/groceries/en-GB/shop{category}"
-        for category in categories
-    ]
-    
+def get_categories(sbr_connection: FirefoxRemoteConnection) -> List[str]:
+    with Remote(sbr_connection, options=webdriver.FirefoxOptions()) as driver:
+        driver.get(f"https://www.tesco.com/groceries/?icid=dchp_groceriesshopgroceries")
+        html = driver.page_source
+        page = BeautifulSoup(html, "html5lib")
+        categories = [f"{BASE_URL}{category.a['href'].replace('?', '/all?', 1)}" for category in page.find_all('li', class_="menu__item--superdepartment")]
+        return categories
     
 class CategoryScraper:
     _categories: List[str]
