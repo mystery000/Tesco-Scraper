@@ -102,11 +102,11 @@ def run_category_scraper():
     try:
         logging.info("Tesco category scraper running...")
 
-        process_count = len(SELENIUM_SERVERS) * 2 # Assign two browser sessions per Grid server
-        categories = get_categories()
-        unit = math.floor(len(categories) / process_count)
-
         sbr_connections = [FirefoxRemoteConnection(SELENIUM_SERVER, "mozilla", "firefox") for SELENIUM_SERVER in SELENIUM_SERVERS]
+
+        process_count = len(SELENIUM_SERVERS) * 2 # Assign two browser sessions per Grid server
+        categories = get_categories(sbr_connections[0])
+        unit = math.floor(len(categories) / process_count)
 
         processes = [
             mp.Process(target=CategoryScraper(categories[unit * i : ], sbr_connections[i % len(SELENIUM_SERVERS)]).run)
