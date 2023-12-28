@@ -83,6 +83,7 @@ def get_product_details(links: List[str], sbr_connection: FirefoxRemoteConnectio
                         price = price_element.find_all('p')
                         item_price = price[0].get_text() if price[0] else None
                         unit_price = price[1].get_text() if price[1] else None
+                        if unit_price is None: unit_price = item_price
                     except:
                         item_price = unit_price = None
                     
