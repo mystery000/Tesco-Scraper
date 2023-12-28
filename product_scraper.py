@@ -12,6 +12,7 @@ import multiprocessing as mp
 from datetime import datetime
 from bs4 import BeautifulSoup
 from selenium import webdriver
+from config import SELENIUM_SERVERS
 from selenium.webdriver import Remote
 from selenium.webdriver.firefox.remote_connection import FirefoxRemoteConnection
 
@@ -199,22 +200,16 @@ def run_product_scraper():
         if os.path.exists(csv_file_name):
             os.remove(csv_file_name)
 
-        process_count = 6
+        process_count = len(SELENIUM_SERVERS) * 2 # Assign two browser sessions per Grid server
         product_page_links = get_product_page_links_from_csv("tesco_product_links.csv")
         unit = math.floor(len(product_page_links) / process_count)
         
-        SELENIUM_GRID_IP_ADDRESSES = [
-            "18.169.27.82:9515",
-            "13.42.66.41:9515",
-            "18.171.169.136:9515"
-        ]
-        
-        sbr_connections = [FirefoxRemoteConnection(f"http://{IP}", "mozilla", "firefox") for IP in SELENIUM_GRID_IP_ADDRESSES]
+        sbr_connections = [FirefoxRemoteConnection(SELENIUM_SERVER, "mozilla", "firefox") for SELENIUM_SERVER in SELENIUM_SERVERS]
 
         processes = [
-            mp.Process(target=get_product_details, args=[product_page_links[unit * i : ], sbr_connections[i % len(SELENIUM_GRID_IP_ADDRESSES)]])
+            mp.Process(target=get_product_details, args=[product_page_links[unit * i : ], sbr_connections[i % len(SELENIUM_SERVERS)]])
             if i == process_count - 1
-            else mp.Process(target=get_product_details, args=[product_page_links[unit * i : unit * (i + 1)], sbr_connections[i % len(SELENIUM_GRID_IP_ADDRESSES)]])
+            else mp.Process(target=get_product_details, args=[product_page_links[unit * i : unit * (i + 1)], sbr_connections[i % len(SELENIUM_SERVERS)]])
             for i in range(process_count)
         ]
 

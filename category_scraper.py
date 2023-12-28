@@ -10,6 +10,7 @@ from typing import List
 import multiprocessing as mp
 from bs4 import BeautifulSoup
 from selenium import webdriver
+from config import SELENIUM_SERVERS
 from selenium.webdriver import Remote
 from selenium.webdriver.firefox.remote_connection import FirefoxRemoteConnection
 
@@ -115,22 +116,16 @@ def run_category_scraper():
     try:
         logging.info("Tesco category scraper running...")
 
-        process_count = 6
+        process_count = len(SELENIUM_SERVERS) * 2 # Assign two browser sessions per Grid server
         categories = get_categories()
         unit = math.floor(len(categories) / process_count)
 
-        SELENIUM_GRID_IP_ADDRESSES = [
-            "18.169.27.82:9515",
-            "13.42.66.41:9515",
-            "18.171.169.136:9515"
-        ]
-        
-        sbr_connections = [FirefoxRemoteConnection(f"http://{IP}", "mozilla", "firefox") for IP in SELENIUM_GRID_IP_ADDRESSES]
+        sbr_connections = [FirefoxRemoteConnection(SELENIUM_SERVER, "mozilla", "firefox") for SELENIUM_SERVER in SELENIUM_SERVERS]
 
         processes = [
-            mp.Process(target=CategoryScraper(categories[unit * i : ], sbr_connections[i % len(SELENIUM_GRID_IP_ADDRESSES)]).run)
+            mp.Process(target=CategoryScraper(categories[unit * i : ], sbr_connections[i % len(SELENIUM_SERVERS)]).run)
             if i == process_count - 1
-            else mp.Process(target=CategoryScraper(categories[unit * i : unit * (i + 1)], sbr_connections[i % len(SELENIUM_GRID_IP_ADDRESSES)]).run)
+            else mp.Process(target=CategoryScraper(categories[unit * i : unit * (i + 1)], sbr_connections[i % len(SELENIUM_SERVERS)]).run)
             for i in range(process_count)
         ]
         
