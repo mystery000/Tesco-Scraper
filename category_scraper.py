@@ -64,15 +64,18 @@ class CategoryScraper:
                 )
                 
             for page_no in range(0, last_page_number):
-                time.sleep(random.choice([0,2, 0.25, 0.3]))
-                with Remote(self._sbr_webdriver_connection, options=firefox_options) as driver:
-                    driver.get(f"{category}&page={page_no + 1}")
-                    html = driver.page_source
-                    page = BeautifulSoup(html, "html5lib")
-                    elements = page.select('.product-list--list-item .product-image-wrapper')
-                    products += [
-                        f"{BASE_URL}{element['href']}" for element in elements
-                    ]
+                try:
+                    time.sleep(random.choice([0,2, 0.25, 0.3]))
+                    with Remote(self._sbr_webdriver_connection, options=firefox_options) as driver:
+                        driver.get(f"{category}&page={page_no + 1}")
+                        html = driver.page_source
+                        page = BeautifulSoup(html, "html5lib")
+                        elements = page.select('.product-list--list-item .product-image-wrapper')
+                        products += [
+                            f"{BASE_URL}{element['href']}" for element in elements
+                        ]
+                except:
+                    continue
 
         except Exception as e:
             logging.info(f"Exception: {str(e)}")
