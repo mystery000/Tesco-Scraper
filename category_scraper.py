@@ -17,12 +17,19 @@ from selenium.webdriver.firefox.remote_connection import FirefoxRemoteConnection
 BASE_URL = "https://www.tesco.com"
 
 def get_categories(sbr_connection: FirefoxRemoteConnection) -> List[str]:
-    with Remote(sbr_connection, options=webdriver.FirefoxOptions()) as driver:
-        driver.get(f"https://www.tesco.com/groceries/?icid=dchp_groceriesshopgroceries")
-        html = driver.page_source
-        page = BeautifulSoup(html, "html5lib")
-        categories = [f"{BASE_URL}{category.a['href'].replace('?', '/all?', 1)}" for category in page.find_all('li', class_="menu__item--superdepartment")]
-        return categories
+    categories: List[str] = []
+    firefox_options = webdriver.FirefoxOptions()
+    firefox_options.add_argument("--start-maximized")
+    try:
+        with Remote(sbr_connection, options=firefox_options) as driver:
+            driver.get(f"https://www.tesco.com/groceries/?icid=dchp_groceriesshopgroceries")
+            html = driver.page_source
+            page = BeautifulSoup(html, "html5lib")
+            categories = [f"{BASE_URL}{category.a['href'].replace('?', '/all?', 1)}" for category in page.find_all('li', class_="menu__item--superdepartment")]
+    except:
+        pass
+    
+    return categories
     
 class CategoryScraper:
     _categories: List[str]
