@@ -120,8 +120,17 @@ def get_product_details(links: List[str], sbr_connection: FirefoxRemoteConnectio
                     except:
                         image_url = None
                     
-                    desc_element = parent.find('div', {'id': 'accordion-panel-product-description'})
-                    description = desc_element.get_text() if desc_element else None
+                    description = ""
+                    try:
+                        description_panel = parent.find('div', {'id': 'accordion-panel-product-description'})
+                        desc_elements = description_panel.div.children if description_panel else None
+                        for desc_element in desc_elements:
+                            if desc_element["class"][0].find("component") < 0:
+                                for children in desc_element.children:
+                                    description += children.get_text() + '\n'
+                            else: break
+                    except:
+                        description = ""
                     
                     nutritions = { "values": [] }
                     
