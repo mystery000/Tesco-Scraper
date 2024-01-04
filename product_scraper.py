@@ -37,7 +37,7 @@ def get_product_details(links: List[str], sbr_connection: FirefoxRemoteConnectio
     firefox_options.add_argument("--start-maximized")
     
     for link in links:
-        time.sleep(random.choice([0.15, 0.2, 0.22, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5]))
+        time.sleep(random.choice([0.1, 0.12, 0.15, 0.18, 0.2]))
         try:
             with Remote(sbr_connection, options=firefox_options) as driver:
                 driver.get(link)
