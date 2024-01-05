@@ -53,7 +53,7 @@ class CategoryScraper:
 
         try:
             with Remote(self._sbr_webdriver_connection, options=firefox_options) as driver:
-                driver.get(f"{category}&page=1")
+                driver.get(f"{category}?page=1")
                 html = driver.page_source
                 page = BeautifulSoup(html, "html5lib")
 
@@ -67,7 +67,7 @@ class CategoryScraper:
                 try:
                     time.sleep(random.choice([0,1, 0.15, 0.18, 0.2]))
                     with Remote(self._sbr_webdriver_connection, options=firefox_options) as driver:
-                        driver.get(f"{category}&page={page_no + 1}")
+                        driver.get(f"{category}?page={page_no + 1}")
                         html = driver.page_source
                         page = BeautifulSoup(html, "html5lib")
                         elements = page.select('.product-list--list-item .product-image-wrapper')
