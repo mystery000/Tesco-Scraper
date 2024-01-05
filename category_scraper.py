@@ -25,7 +25,7 @@ def get_categories(sbr_connection: FirefoxRemoteConnection) -> List[str]:
             driver.get(f"https://www.tesco.com/groceries/?icid=dchp_groceriesshopgroceries")
             html = driver.page_source
             page = BeautifulSoup(html, "html5lib")
-            categories = [f"{BASE_URL}{category.a['href'].replace('?', '/all?', 1)}" for category in page.find_all('li', class_="menu__item--superdepartment")]
+            categories = [f"{BASE_URL}{category.a['href'].replace('?include-children=true', '/all', 1)}" for category in page.find_all('li', class_="menu__item--superdepartment")]
     except:
         pass
     
